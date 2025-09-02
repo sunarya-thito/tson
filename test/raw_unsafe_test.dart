@@ -54,6 +54,28 @@ void main() {
       expect(json, contains('"2":false'));
       expect(json, contains('"a":2'));
       expect(json, contains('"x":true'));
+
+      // Accessing invalid numeric value triggers parse failure
+      expect(() => obj['n']!.asNumber.value, throwsFormatException);
+    });
+
+    test('failing parse via access and equality triggers', () {
+      // Direct access triggers failure
+      final badNum = JsonValue.unsafe('abc').asNumber;
+      expect(() => badNum.value, throwsFormatException);
+
+      final badBool = JsonValue.unsafe('notbool').asBoolean;
+      expect(() => badBool.value, throwsFormatException);
+
+      // Equality should also trigger lazy parsing and thus throw
+      expect(() => (JsonValue.unsafe('abc').asNumber == 0.json),
+          throwsFormatException);
+      expect(() => (JsonValue.unsafe('notbool').asBoolean == false.json),
+          throwsFormatException);
+
+      // In arrays: invalid element fails when accessed
+      final arrBad = JsonValue.unsafe(['2x']).asArray;
+      expect(() => arrBad[0]!.asNumber.value, throwsFormatException);
     });
   });
 }
