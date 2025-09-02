@@ -282,6 +282,10 @@ class JsonRegistry {
         return parser.toJson(object, entry);
       }
     }
+    final parent = registry.parent;
+    if (parent != null) {
+      return findAndSerialize(object, registry: parent);
+    }
     return null;
   }
 
@@ -300,6 +304,10 @@ class JsonRegistry {
       if (parser.canParse(json, entry)) {
         return parser.fromJson(json, entry);
       }
+    }
+    final parent = registry.parent;
+    if (parent != null) {
+      return findAndDeserialize(json, registry: parent);
     }
     return null;
   }
