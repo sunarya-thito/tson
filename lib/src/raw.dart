@@ -374,7 +374,8 @@ class _RawJsonArray extends AbstractJsonValue
   }
 
   @override
-  Object toEncodeable() => _value;
+  Object toEncodeable() =>
+      _value.map((e) => _wrapNullable(e)?.toEncodeable()).toList();
 
   @override
   String toJson() => jsonEncode(toEncodeable());
