@@ -1,0 +1,20 @@
+name: tson
+description: Typed JSON values and a pluggable registry for custom (de)serialization with pretty building and custom parsers.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+topics:
+- json
+- serialization
+- encoding
+- registry
+
+# Add regular dependencies here.
+dependencies: # path: ^1.9.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
