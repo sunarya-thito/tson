@@ -1,4 +1,4 @@
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
   // Booleans and numbers parse lazily when .value is accessed

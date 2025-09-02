@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:tson/src/util.dart';
+import 'package:typeson/src/util.dart';
 
 /// Pretty and compact JSON string builder.
 ///

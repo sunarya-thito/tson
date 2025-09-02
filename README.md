@@ -1,4 +1,4 @@
-## tson — Typed JSON values and pluggable (de)serialization for Dart
+## typeson — Typed JSON values and pluggable (de)serialization for Dart
 
 Typed wrappers for JSON values, ergonomic builders, and a flexible registry for
 custom (de)serialization. Works great for transforming JSON with type-safe
@@ -17,13 +17,8 @@ Add to your pubspec.yaml:
 
 ```yaml
 dependencies:
-    tson: ^1.0.0
-```
-
-Or via CLI:
-
-```sh
-dart pub add tson
+    tson:
+        git: https://github.com/sunarya-thito/tson.git
 ```
 
 Requires Dart SDK >= 3.0.0.
@@ -33,7 +28,7 @@ Requires Dart SDK >= 3.0.0.
 ### Primitives
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/tson.dart';
 
 void main() {
 	final JsonString s = 'hello'.json;
@@ -58,7 +53,7 @@ void main() {
 ### Arrays and objects
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
 	// Array preserves nulls
@@ -92,7 +87,7 @@ The .build extension uses JsonBuilder with:
   are preserved
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
 	final JsonObject obj = {
@@ -133,7 +128,7 @@ void main() {
 ### Parse JSON string to typed nodes
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
 	const raw = '{"title":"Example","count":3,"items":[{"id":1},{"id":2}]}'
@@ -160,7 +155,7 @@ without eagerly converting elements. Booleans and numbers are parsed only when
 .value is accessed; lists and maps are preserved and lazily wrapped.
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
 	final rawBool = JsonValue.unsafe({'ok': 'true'});
@@ -200,7 +195,7 @@ Key pieces:
 - JsonRegistryEntry.exactType and .assignableType helpers for matching
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 class PersonName {
 	final String firstName;
@@ -282,7 +277,7 @@ void main() {
 Use FlatTypeParser to inline a type discriminator instead of the envelope:
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 class Name { final String v; Name(this.v); }
 
@@ -316,7 +311,7 @@ Entries can match by exact runtime type (default) or via a predicate like
 assignableType:
 
 ```dart
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 abstract class Animal {}
 class Dog implements Animal { final String name; Dog(this.name); }

@@ -1,5 +1,4 @@
-import 'package:tson/src/encoder.dart';
-import 'package:tson/src/object.dart';
+import 'package:typeson/typeson.dart';
 
 /// Convenience methods for building and working with [JsonValue] trees.
 ///

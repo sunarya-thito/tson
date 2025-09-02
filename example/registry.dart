@@ -1,4 +1,4 @@
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 void main() {
   // Define registry entries for custom types

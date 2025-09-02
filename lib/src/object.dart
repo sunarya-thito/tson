@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:tson/tson.dart';
+import 'package:collection/collection.dart';
+import 'package:typeson/typeson.dart';
 import 'raw.dart' as raw;
 
 /// Base interface for all JSON values used by this library.
@@ -81,7 +82,10 @@ abstract interface class JsonValue {
   /// print(rawMap['a']!.asNumber.value); // 1
   /// print(rawMap['2']!.asBoolean.value); // false
   /// ```
-  factory JsonValue.unsafe(Object rawValue) => raw.RawJsonValue(rawValue);
+  factory JsonValue.unsafe(Object rawValue) => switch (rawValue) {
+        JsonValue v => v,
+        Object o => raw.RawJsonValue(o),
+      };
 
   /// Parses a JSON [source] string into a [JsonValue] tree using `jsonDecode`.
   ///
@@ -797,6 +801,16 @@ class JsonArray extends AbstractJsonValue with Iterable<JsonValue?> {
 
   @override
   String toString() => value.toString();
+
+  @override
+  int get hashCode => const ListEquality().hash(value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JsonArray) return false;
+    return const ListEquality().equals(value, other.value);
+  }
 }
 
 /// Represents a JSON object keyed by strings with optional [JsonValue] values.
@@ -1087,5 +1101,15 @@ class JsonObject extends AbstractJsonValue
   @override
   String toString() {
     return value.toString();
+  }
+
+  @override
+  int get hashCode => const MapEquality().hash(value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JsonObject) return false;
+    return const MapEquality().equals(value, other.value);
   }
 }

@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:tson/src/util.dart';
+import 'package:typeson/src/util.dart';
 
 void main() {
   test('eliminateNull recursive', () {

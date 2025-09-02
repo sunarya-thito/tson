@@ -1,6 +1,11 @@
 import 'dart:convert';
 
-import 'package:tson/tson.dart';
+import 'package:collection/collection.dart';
+import 'package:typeson/typeson.dart';
+
+JsonValue? _wrapNullable(Object? object) {
+  return object == null ? null : JsonValue.unsafe(object);
+}
 
 /// Internal raw wrappers that preserve original Dart structures and parse
 /// lazily.
@@ -58,13 +63,7 @@ class RawJsonValue implements JsonValue {
   @override
   JsonObject get asObject {
     assert(value is Map, 'Expected Map for asObject, got ${value.runtimeType}');
-    final map = (value as Map);
-    final coerced = <String, Object?>{};
-    for (final entry in map.entries) {
-      if (entry.key == null) continue;
-      coerced[entry.key.toString()] = entry.value;
-    }
-    return _RawJsonObject(coerced);
+    return _RawJsonObject(value as Map);
   }
 
   /// Returns this value as a string wrapper.
@@ -98,6 +97,16 @@ class RawJsonValue implements JsonValue {
 
   @override
   String toString() => value.toString();
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JsonValue) return false;
+    return other.value == value;
+  }
 }
 
 /// Internal raw variant of [JsonString] that keeps the original string
@@ -256,6 +265,7 @@ class _RawJsonBoolean extends RawJsonValue implements JsonBoolean {
 class _RawJsonArray extends AbstractJsonValue
     with Iterable<JsonValue?>
     implements JsonArray {
+  // assume that there is no JsonValue on this list
   final List<Object?> _value;
 
   /// Creates a raw array wrapper from a list of objects.
@@ -263,57 +273,60 @@ class _RawJsonArray extends AbstractJsonValue
 
   /// Lazily wrapped view of the underlying list.
   @override
-  List<JsonValue?> get value => List<JsonValue?>.unmodifiable(
-        _value.map(
-            (e) => e is JsonValue ? e : (e == null ? null : RawJsonValue(e))),
-      );
+  List<JsonValue?> get value =>
+      List<JsonValue?>.unmodifiable(_value.map(_wrapNullable));
 
   @override
   Iterator<JsonValue?> get iterator => value.iterator;
 
   @override
   JsonValue? operator [](int index) {
-    final v = _value[index];
-    return v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
+    return _wrapNullable(_value[index]);
   }
 
   @override
   void operator []=(int index, JsonValue? value) {
-    _value[index] = value is RawJsonValue ? value.value : value?.toEncodeable();
+    _value[index] = value;
   }
 
   @override
   void add(JsonValue? element) {
-    _value
-        .add(element is RawJsonValue ? element.value : element?.toEncodeable());
+    _value.add(element);
   }
 
   @override
   void addAll(Iterable<JsonValue?> elements) {
-    _value.addAll(
-        elements.map((e) => e is RawJsonValue ? e.value : e?.toEncodeable()));
+    _value.addAll(elements);
   }
 
   @override
   bool containsElement(JsonValue? element) {
-    final probe =
-        element is RawJsonValue ? element.value : element?.toEncodeable();
-    return _value.contains(probe);
+    for (final e in _value) {
+      if (_wrapNullable(e) == element) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
   bool remove(JsonValue? element) {
-    final probe =
-        element is RawJsonValue ? element.value : element?.toEncodeable();
-    return _value.remove(probe);
+    bool removed = false;
+    for (int i = 0; i < _value.length; i++) {
+      if (_wrapNullable(_value[i]) == element) {
+        _value.removeAt(i);
+        removed = true;
+        break;
+      }
+    }
+    return removed;
   }
 
   @override
   Map<int, JsonValue?> asMap() {
     return Map.fromIterables(
       Iterable<int>.generate(_value.length),
-      _value.map(
-          (e) => e is JsonValue ? e : (e == null ? null : RawJsonValue(e))),
+      _value.map(_wrapNullable),
     );
   }
 
@@ -322,36 +335,34 @@ class _RawJsonArray extends AbstractJsonValue
 
   @override
   void insert(int index, JsonValue? element) {
-    _value.insert(index,
-        element is RawJsonValue ? element.value : element?.toEncodeable());
+    _value.insert(index, element);
   }
 
   @override
   void insertAll(int index, Iterable<JsonValue?> elements) {
-    _value.insertAll(index,
-        elements.map((e) => e is RawJsonValue ? e.value : e?.toEncodeable()));
+    _value.insertAll(index, elements);
   }
 
   @override
   bool removeAll(Iterable<JsonValue?> elements) {
     bool removed = false;
-    for (final e in elements) {
-      final probe = e is RawJsonValue ? e.value : e?.toEncodeable();
-      removed = _value.remove(probe) || removed;
+    for (int i = _value.length - 1; i >= 0; i--) {
+      if (elements.contains(_wrapNullable(_value[i]))) {
+        _value.removeAt(i);
+        removed = true;
+      }
     }
     return removed;
   }
 
   @override
   JsonValue? removeAt(int index) {
-    final v = _value.removeAt(index);
-    return v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
+    return _wrapNullable(_value.removeAt(index));
   }
 
   @override
   JsonValue? removeLast() {
-    final v = _value.removeLast();
-    return v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
+    return _wrapNullable(_value.removeLast());
   }
 
   @override
@@ -359,8 +370,7 @@ class _RawJsonArray extends AbstractJsonValue
 
   @override
   void removeWhere(bool Function(JsonValue? element) test) {
-    _value.removeWhere(
-        (e) => test(e is JsonValue ? e : (e == null ? null : RawJsonValue(e))));
+    _value.removeWhere((e) => test(_wrapNullable(e)));
   }
 
   @override
@@ -368,6 +378,16 @@ class _RawJsonArray extends AbstractJsonValue
 
   @override
   String toJson() => jsonEncode(toEncodeable());
+
+  @override
+  int get hashCode => const ListEquality().hash(value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JsonArray) return false;
+    return const ListEquality().equals(value, other.value);
+  }
 }
 
 // Returns raw objects
@@ -378,20 +398,22 @@ class _RawJsonArray extends AbstractJsonValue
 class _RawJsonObject extends AbstractJsonValue
     with Iterable<MapEntry<String, JsonValue?>>
     implements JsonObject {
-  final Map<String, Object?> _value;
+  // assume that there is no JsonValue on this map
+  final Map<Object?, Object?> _rawMap;
 
-  /// Creates a raw object wrapper from a string-keyed map.
-  _RawJsonObject(this._value);
+  /// Accepts any Map; keys are coerced lazily when value is accessed.
+  _RawJsonObject(this._rawMap);
 
   @override
-  Map<String, JsonValue?> get value => Map<String, JsonValue?>.fromEntries(
-        _value.entries.map((e) => MapEntry(
-              e.key,
-              e.value is JsonValue
-                  ? e.value as JsonValue
-                  : (e.value == null ? null : RawJsonValue(e.value!)),
-            )),
-      );
+  Map<String, JsonValue?> get value {
+    // Lazily coerce keys to String and ignore null keys.
+    return Map<String, JsonValue?>.fromEntries(
+      _rawMap.entries.where((e) => e.key != null).map((e) => MapEntry(
+            e.key.toString(),
+            _wrapNullable(e.value),
+          )),
+    );
+  }
 
   @override
   Iterator<MapEntry<String, JsonValue?>> get iterator => value.entries.iterator;
@@ -399,70 +421,84 @@ class _RawJsonObject extends AbstractJsonValue
   @override
   JsonValue? operator [](Object? key) {
     if (key is! String) return null;
-    final v = _value[key];
-    return v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
+    for (final entry in _rawMap.entries) {
+      if (entry.key.toString() == key) {
+        return _wrapNullable(entry.value);
+      }
+    }
+    return null;
   }
 
   @override
   void operator []=(String key, JsonValue? value) {
-    _value[key] = value is RawJsonValue ? value.value : value?.toEncodeable();
+    _rawMap[key] = value;
   }
 
   @override
-  void clear() => _value.clear();
+  void clear() => _rawMap.clear();
 
   @override
   Iterable<MapEntry<String, JsonValue?>> get entries => value.entries;
 
   @override
-  Iterable<String> get keys => _value.keys;
+  Iterable<String> get keys =>
+      _rawMap.keys.where((k) => k != null).map((k) => k.toString());
 
   @override
   void putAll(Map<String, JsonValue?> other) {
-    _value.addAll(other.map((k, v) =>
-        MapEntry(k, v is RawJsonValue ? v.value : v?.toEncodeable())));
+    for (final entry in other.entries) {
+      final k = entry.key;
+      final v = entry.value;
+      _rawMap[k] = v;
+    }
   }
 
   @override
   void putAllEntries(Iterable<MapEntry<String, JsonValue?>> other) {
     for (final e in other) {
+      final k = e.key;
       final v = e.value;
-      _value[e.key] = v is RawJsonValue ? v.value : v?.toEncodeable();
+      _rawMap[k] = v;
     }
   }
 
   @override
   JsonValue? remove(String key) {
-    final v = _value.remove(key);
-    return v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
+    JsonValue? removed;
+    _rawMap.removeWhere((k, v) {
+      if (k.toString() == key) {
+        removed = _wrapNullable(v);
+        return true;
+      }
+      return false;
+    });
+    return removed;
   }
 
   @override
   void removeWhere(bool Function(String key, JsonValue? value) test) {
-    final toRemove = <String>[];
-    _value.forEach((k, v) {
-      final wrapped = v is JsonValue ? v : (v == null ? null : RawJsonValue(v));
-      if (test(k, wrapped)) toRemove.add(k);
+    _rawMap.removeWhere((k, v) {
+      final wrapped = _wrapNullable(v);
+      return test(k.toString(), wrapped);
     });
-    for (final k in toRemove) {
-      _value.remove(k);
-    }
   }
 
   @override
-  Iterable<JsonValue?> get values => _value.values
-      .map((v) => v is JsonValue ? v : (v == null ? null : RawJsonValue(v)));
+  Iterable<JsonValue?> get values =>
+      _rawMap.values.map((v) => _wrapNullable(v));
 
   @override
   JsonValue? putIfAbsent(String key, JsonValue? Function() ifAbsent) {
-    final existing = _value[key];
-    if (existing != null || _value.containsKey(key)) {
-      return existing is JsonValue
-          ? existing
-          : (existing == null ? null : RawJsonValue(existing));
-    }
+    JsonValue? existing;
+    _rawMap.forEach((k, v) {
+      if (k.toString() == key) {
+        existing = _wrapNullable(v);
+      }
+    });
+    if (existing != null) return existing;
+
     final v = ifAbsent();
-    _value[key] = v is RawJsonValue ? v.value : v?.toEncodeable();
+    _rawMap[key] = v;
     return v;
   }
 
@@ -472,18 +508,20 @@ class _RawJsonObject extends AbstractJsonValue
     JsonValue? Function(JsonValue? value) update, {
     JsonValue? Function()? ifAbsent,
   }) {
-    if (_value.containsKey(key)) {
-      final current = _value[key];
-      final newVal = update(current is JsonValue
-          ? current
-          : (current == null ? null : RawJsonValue(current)));
-      _value[key] =
-          newVal is RawJsonValue ? newVal.value : newVal?.toEncodeable();
+    JsonValue? existing;
+    _rawMap.forEach((k, v) {
+      if (k.toString() == key) {
+        existing = _wrapNullable(v);
+      }
+    });
+    if (existing != null) {
+      final newVal = update(existing);
+      _rawMap[key] = newVal;
       return newVal;
     }
     if (ifAbsent != null) {
       final v = ifAbsent();
-      _value[key] = v is RawJsonValue ? v.value : v?.toEncodeable();
+      _rawMap[key] = v;
       return v;
     }
     throw ArgumentError('Key not found: $key');
@@ -491,29 +529,37 @@ class _RawJsonObject extends AbstractJsonValue
 
   @override
   void updateAll(JsonValue? Function(String key, JsonValue? value) update) {
-    _value.updateAll((k, v) {
-      final updated =
-          update(k, v is JsonValue ? v : (v == null ? null : RawJsonValue(v)));
-      return updated is RawJsonValue ? updated.value : updated?.toEncodeable();
+    _rawMap.forEach((k, v) {
+      final newVal = update(k.toString(), _wrapNullable(v));
+      _rawMap[k] = newVal;
     });
   }
 
   @override
-  bool containsKey(Object? key) => key is String && _value.containsKey(key);
-
-  @override
-  bool containsValue(Object? value) {
-    // Accept either a JsonValue (unwrap) or a raw value for comparison.
-    final probe = value is RawJsonValue
-        ? value.value
-        : value is JsonValue
-            ? value.toEncodeable()
-            : value;
-    return _value.containsValue(probe);
+  bool containsKey(Object? key) {
+    for (final k in _rawMap.keys) {
+      if (k.toString() == key) return true;
+    }
+    return false;
   }
 
   @override
-  Object toEncodeable() => _value;
+  bool containsValue(Object? value) {
+    for (final v in _rawMap.values) {
+      if (_wrapNullable(v) == value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @override
+  Object toEncodeable() => Map<String, Object?>.fromEntries(
+        _rawMap.entries.where((e) => e.key != null).map((e) => MapEntry(
+              e.key.toString(),
+              _wrapNullable(e.value)?.toEncodeable(),
+            )),
+      );
 
   @override
   String toJson() => jsonEncode(toEncodeable());
@@ -523,5 +569,15 @@ class _RawJsonObject extends AbstractJsonValue
     final result = JsonRegistry.findAndDeserialize(this, registry: registry);
     if (result is T) return result;
     throw Exception('Cannot convert $this to $T');
+  }
+
+  @override
+  int get hashCode => const MapEquality().hash(value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JsonObject) return false;
+    return const MapEquality().equals(value, other.value);
   }
 }

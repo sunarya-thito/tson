@@ -1,4 +1,4 @@
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 /// A custom parser that stores no type-discriminator at all.
 /// It picks the matching entry purely by the JSON object's shape.

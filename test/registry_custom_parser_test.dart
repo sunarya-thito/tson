@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 class Name {
   final String v;

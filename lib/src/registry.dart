@@ -1,4 +1,4 @@
-import 'package:tson/tson.dart';
+import 'package:typeson/typeson.dart';
 
 /// Function that converts an instance of [T] into a [JsonObject].
 ///
