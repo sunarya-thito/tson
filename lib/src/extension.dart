@@ -192,3 +192,9 @@ extension RawJsonExtension on Object {
     return JsonValue.unsafe(this);
   }
 }
+
+extension SerializableJsonValue on Object {
+  JsonValue? get typeAsJson {
+    return JsonRegistry.findAndSerialize(this);
+  }
+}
