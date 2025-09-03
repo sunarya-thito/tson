@@ -87,7 +87,7 @@ class DefaultJsonObjectParser implements JsonObjectParser {
 /// configurable type discriminator key instead of the default
 /// {"__type": T, "__data": {...}} envelope.
 ///
-/// Result shape: { "<typeKey>": "TypeName", ...dataFields }
+/// Result shape: { "{typeKey}": "TypeName", ...dataFields }
 class FlatTypeParser implements JsonObjectParser {
   /// The discriminator key that stores the entry's type identifier.
   final String typeKey;
