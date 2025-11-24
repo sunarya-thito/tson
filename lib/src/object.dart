@@ -160,7 +160,8 @@ abstract interface class JsonValue {
   /// final j = JsonValue({'x': 1, 'y': true});
   /// print(j.toJson()); // {"x":1,"y":true}
   /// ```
-  String toJson();
+  String toJson(
+      {JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls});
 }
 
 /// Shared implementation for [JsonValue] variants.
@@ -213,8 +214,10 @@ abstract class AbstractJsonValue implements JsonValue {
   }
 
   @override
-  String toJson() {
-    return jsonEncode(toEncodeable());
+  String toJson(
+      {JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls}) {
+    final encodeable = toEncodeable();
+    return (JsonBuilder(encodeable)..options = options).toString();
   }
 
   @override

@@ -2,15 +2,60 @@ import 'dart:convert';
 
 import 'package:typeson/src/util.dart';
 
+/// Options for json encoding behavior.
+class JsonEncoderOptions {
+  /// Serialize in compact form without indentation and newlines and eliminate
+  /// nulls from maps.
+  static const compact = JsonEncoderOptions(indent: null, explicitNulls: false);
+
+  /// Serialize in pretty form with indentation and newlines, eliminating
+  /// nulls from maps.
+  static const pretty = JsonEncoderOptions(indent: 2, explicitNulls: false);
+
+  /// Serialize in pretty form with indentation and newlines, keeping nulls
+  /// in maps.
+  static const prettyWithNulls =
+      JsonEncoderOptions(indent: 2, explicitNulls: true);
+
+  /// Serialize in compact form without indentation and newlines, keeping
+  /// nulls in maps.
+  static const compactWithNulls =
+      JsonEncoderOptions(indent: null, explicitNulls: true);
+
+  /// Controls indentation width in spaces.
+  ///
+  /// - If `null`, a compact single-line string is produced.
+  /// - If a non-negative integer, that many spaces are used per indent level.
+  final int? indent;
+
+  /// When `true`, keeps `null` values in maps. When `false`, properties whose
+  /// value is `null` are removed from maps before encoding. Nulls in lists are
+  /// always preserved.
+  final bool explicitNulls;
+  const JsonEncoderOptions({
+    required this.indent,
+    required this.explicitNulls,
+  });
+
+  static const _indentSentinel = -1;
+
+  /// Returns a copy of this options object with the given fields replaced.
+  JsonEncoderOptions copyWith({
+    int? indent = _indentSentinel,
+    bool? explicitNulls,
+  }) {
+    return JsonEncoderOptions(
+      indent: indent == _indentSentinel ? this.indent : indent,
+      explicitNulls: explicitNulls ?? this.explicitNulls,
+    );
+  }
+}
+
 /// Pretty and compact JSON string builder.
 ///
 /// Given a JSON-encodeable value (maps, lists, primitives), this class can
 /// convert it into a human-readable string with indentation or into a compact
 /// single-line string, optionally removing `null` values from maps.
-///
-/// By default, [indent] is `2` (two spaces) and [explicitNulls] is `false`,
-/// which means nulls inside maps are removed (see [eliminateNull]) while nulls
-/// inside lists are preserved.
 ///
 /// Example:
 /// ```dart
@@ -47,12 +92,17 @@ class JsonBuilder {
   ///
   /// - If `null`, a compact single-line string is produced.
   /// - If a non-negative integer, that many spaces are used per indent level.
-  int? indent = 2;
+  @Deprecated('Use options instead')
+  int? indent;
 
   /// When `true`, keeps `null` values in maps. When `false`, properties whose
   /// value is `null` are removed from maps before encoding. Nulls in lists are
   /// always preserved.
+  @Deprecated('Use options instead')
   bool explicitNulls = false;
+
+  /// Options for JSON encoding.
+  JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls;
 
   /// Creates a [JsonBuilder] for the given [json] value.
   ///
@@ -60,15 +110,16 @@ class JsonBuilder {
   /// - [json]: Any JSON-encodeable value (`Map`, `List`, primitives, or `null`).
   JsonBuilder(this.json);
 
-  /// Converts the configured [json] into a string according to [indent] and
-  /// [explicitNulls].
+  /// Converts the configured [json] into a string according to [options].
   @override
   String toString() {
     Object? json = this.json;
-    if (!explicitNulls) {
+    // ignore: deprecated_member_use_from_same_package
+    if (!explicitNulls || !options.explicitNulls) {
       json = eliminateNull(json);
     }
-    int? indent = this.indent;
+    // ignore: deprecated_member_use_from_same_package
+    int? indent = this.indent ?? options.indent;
     JsonEncoder encoder = JsonEncoder.withIndent(
       indent == null ? null : ' ' * indent,
     );

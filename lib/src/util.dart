@@ -24,9 +24,7 @@
 ///
 /// Returns a new structure; the input [value] is not mutated.
 Object? eliminateNull(Object? value) {
-  if (value is List) {
-    return eliminateNullInList(value);
-  } else if (value is Map) {
+  if (value is Map) {
     return eliminateNullInMap(value);
   } else {
     return value;

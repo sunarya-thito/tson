@@ -1,6 +1,6 @@
 name: typeson
 description: Typed JSON values and a pluggable registry for custom (de)serialization with pretty building and custom parsers.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/sunarya-thito/tson
 homepage: https://github.com/sunarya-thito/tson
 

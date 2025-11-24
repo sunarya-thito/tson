@@ -31,22 +31,22 @@ Requires Dart SDK >= 3.0.0.
 import 'package:typeson/tson.dart';
 
 void main() {
-	final JsonString s = 'hello'.json;
-	final JsonNumber n = 42.json;
-	final JsonBoolean b = true.json;
+  final JsonString s = 'hello'.json;
+  final JsonNumber n = 42.json;
+  final JsonBoolean b = true.json;
 
-	print(s.toJson()); // "hello"
-	print(n.toJson()); // 42
-	print(b.toJson()); // true
+  print(s.toJson()); // "hello"
+  print(n.toJson()); // 42
+  print(b.toJson()); // true
 
-	print(n.asString.value); // 42
-	print('123'.json.maybeAsNumber?.value); // 123
-	print('true'.json.maybeAsBoolean?.value); // true
+  print(n.asString.value); // 42
+  print('123'.json.maybeAsNumber?.value); // 123
+  print('true'.json.maybeAsBoolean?.value); // true
 
-	final JsonNumber a = 10.json;
-	final JsonNumber c = 5.json;
-	print((a + c).value); // 15
-	print((a > c).value); // true
+  final JsonNumber a = 10.json;
+  final JsonNumber c = 5.json;
+  print((a + c).value); // 15
+  print((a > c).value); // true
 }
 ```
 
@@ -56,25 +56,25 @@ void main() {
 import 'package:typeson/typeson.dart';
 
 void main() {
-	// Array preserves nulls
-	final JsonArray arr = [1, 'two', true, null].json;
-	print(arr.toJson()); // [1,"two",true,null]
+  // Array preserves nulls
+  final JsonArray arr = [1, 'two', true, null].json;
+  print(arr.toJson()); // [1,"two",true,null]
 
-	// Object: keys stringified, null values kept in the node, but build() can drop nulls from maps (see below)
-	final JsonObject obj = {
-		'id': 1001,
-		'name': 'Widget',
-		'tags': ['a', 'b', 'c'],
-		'stock': null,
-	}.json;
+  // Object: keys stringified, null values kept in the node, but build() can drop nulls from maps (see below)
+  final JsonObject obj = {
+    'id': 1001,
+    'name': 'Widget',
+    'tags': ['a', 'b', 'c'],
+    'stock': null,
+  }.json;
 
-	// Access
-	print(obj['name']!.asString.value); // Widget
-	print(obj['tags']!.asArray[0]!.asString.value); // a
+  // Access
+  print(obj['name']!.asString.value); // Widget
+  print(obj['tags']!.asArray[0]!.asString.value); // a
 
-	// Mutate
-	obj['price'] = 9.99.json;
-	print(obj['price']!.asNumber.doubleValue); // 9.99
+  // Mutate
+  obj['price'] = 9.99.json;
+  print(obj['price']!.asNumber.doubleValue); // 9.99
 }
 ```
 
@@ -90,38 +90,38 @@ The .build extension uses JsonBuilder with:
 import 'package:typeson/typeson.dart';
 
 void main() {
-	final JsonObject obj = {
-		'id': 7,
-		'name': 'Null Demo',
-		'note': null, // removed by default
-		'nested': {'keepNull': null, 'value': 1},
-	}.json;
+  final JsonObject obj = {
+    'id': 7,
+    'name': 'Null Demo',
+    'note': null, // removed by default
+    'nested': {'keepNull': null, 'value': 1},
+  }.json;
 
-	// Default: indent=2, explicitNulls=false
-	print(obj.build());
-	// {
-	//   "id": 7,
-	//   "name": "Null Demo",
-	//   "nested": {
-	//     "value": 1
-	//   }
-	// }
+  // Default: indent=2, explicitNulls=false
+  print(obj.build());
+  // {
+  //   "id": 7,
+  //   "name": "Null Demo",
+  //   "nested": {
+  //     "value": 1
+  //   }
+  // }
 
-	// Keep nulls
-	print(obj.build(explicitNulls: true));
-	// {
-	//   "id": 7,
-	//   "name": "Null Demo",
-	//   "note": null,
-	//   "nested": {
-	//     "keepNull": null,
-	//     "value": 1
-	//   }
-	// }
+  // Keep nulls
+  print(obj.build(explicitNulls: true));
+  // {
+  //   "id": 7,
+  //   "name": "Null Demo",
+  //   "note": null,
+  //   "nested": {
+  //     "keepNull": null,
+  //     "value": 1
+  //   }
+  // }
 
-	// Compact
-	print(obj.build(indent: null));
-	// {"id":7,"name":"Null Demo","nested":{"value":1}}
+  // Compact
+  print(obj.build(indent: null));
+  // {"id":7,"name":"Null Demo","nested":{"value":1}}
 }
 ```
 
@@ -131,20 +131,20 @@ void main() {
 import 'package:typeson/typeson.dart';
 
 void main() {
-	const raw = '{"title":"Example","count":3,"items":[{"id":1},{"id":2}]}'
-			;
-	final JsonValue value = JsonValue.parse(raw);
+  const raw = '{"title":"Example","count":3,"items":[{"id":1},{"id":2}]}'
+      ;
+  final JsonValue value = JsonValue.parse(raw);
 
-	final JsonObject root = value.asObject;
-	final title = root['title']!.asString.value;
-	final count = root['count']!.asNumber.intValue;
-	final firstId = root['items']!.asArray[0]!.asObject['id']!.asNumber.intValue;
+  final JsonObject root = value.asObject;
+  final title = root['title']!.asString.value;
+  final count = root['count']!.asNumber.intValue;
+  final firstId = root['items']!.asArray[0]!.asObject['id']!.asNumber.intValue;
 
-	print('title=$title, count=$count, firstId=$firstId');
-	// title=Example, count=3, firstId=1
+  print('title=$title, count=$count, firstId=$firstId');
+  // title=Example, count=3, firstId=1
 
-	print(root.build(indent: null));
-	// {"title":"Example","count":3,"items":[{"id":1},{"id":2}]}
+  print(root.build(indent: null));
+  // {"title":"Example","count":3,"items":[{"id":1},{"id":2}]}
 }
 ```
 
@@ -158,23 +158,23 @@ without eagerly converting elements. Booleans and numbers are parsed only when
 import 'package:typeson/typeson.dart';
 
 void main() {
-	final rawBool = JsonValue.unsafe({'ok': 'true'});
-	final ok = rawBool.asObject['ok']!.asBoolean; // not parsed yet
-	print(ok.value); // true
+  final rawBool = JsonValue.unsafe({'ok': 'true'});
+  final ok = rawBool.asObject['ok']!.asBoolean; // not parsed yet
+  print(ok.value); // true
 
-	final rawNum = JsonValue.unsafe('3.14').asNumber; // not parsed yet
-	print(rawNum.value); // 3.14
+  final rawNum = JsonValue.unsafe('3.14').asNumber; // not parsed yet
+  print(rawNum.value); // 3.14
 
-	final rawList = JsonValue.unsafe([1, '2', true, null]).asArray;
-	print(rawList[1]!.asNumber.intValue); // 2
+  final rawList = JsonValue.unsafe([1, '2', true, null]).asArray;
+  print(rawList[1]!.asNumber.intValue); // 2
 
-	final rawMap = JsonValue.unsafe({'a': '1', 2: false}).asObject;
-	print(rawMap['a']!.asNumber.value); // 1
-	print(rawMap['2']!.asBoolean.value); // false
+  final rawMap = JsonValue.unsafe({'a': '1', 2: false}).asObject;
+  print(rawMap['a']!.asNumber.value); // 1
+  print(rawMap['2']!.asBoolean.value); // false
 
-	// Mutations store raw values back
-	rawMap['x'] = JsonString('hello');
-	print(rawMap.toJson()); // {"a":"1","2":false,"x":"hello"}
+  // Mutations store raw values back
+  rawMap['x'] = JsonString('hello');
+  print(rawMap.toJson()); // {"a":"1","2":false,"x":"hello"}
 }
 ```
 
@@ -198,77 +198,77 @@ Key pieces:
 import 'package:typeson/typeson.dart';
 
 class PersonName {
-	final String firstName;
-	final String lastName;
-	PersonName(this.firstName, this.lastName);
+  final String firstName;
+  final String lastName;
+  PersonName(this.firstName, this.lastName);
 }
 
 class Person {
-	final PersonName name;
-	final int age;
-	Person(this.name, this.age);
+  final PersonName name;
+  final int age;
+  Person(this.name, this.age);
 }
 
 void main() {
-	final registry = JsonRegistry(
-		entries: [
-			JsonRegistryEntry<PersonName>(
-				type: 'PersonName',
-				serializer: (e) =>
-						JsonObject.wrap({'firstName': e.firstName, 'lastName': e.lastName}),
-				deserializer: (json) => PersonName(
-					json['firstName']!.asString.value,
-					json['lastName']!.asString.value,
-				),
-			),
-			JsonRegistryEntry<Person>(
-				type: 'Person',
-				serializer: (e) => JsonObject.wrap({
-					'name': JsonRegistry.currentRegistry.serialize(e.name).asObject,
-					'age': e.age,
-				}),
-				deserializer: (json) => Person(
-					json['name']!.asType<PersonName>(),
-					json['age']!.asNumber.intValue,
-				),
-			),
-		],
-	);
+  final registry = JsonRegistry(
+    entries: [
+      JsonRegistryEntry<PersonName>(
+        type: 'PersonName',
+        serializer: (e) =>
+            JsonObject.wrap({'firstName': e.firstName, 'lastName': e.lastName}),
+        deserializer: (json) => PersonName(
+          json['firstName']!.asString.value,
+          json['lastName']!.asString.value,
+        ),
+      ),
+      JsonRegistryEntry<Person>(
+        type: 'Person',
+        serializer: (e) => JsonObject.wrap({
+          'name': JsonRegistry.currentRegistry.serialize(e.name).asObject,
+          'age': e.age,
+        }),
+        deserializer: (json) => Person(
+          json['name']!.asType<PersonName>(),
+          json['age']!.asNumber.intValue,
+        ),
+      ),
+    ],
+  );
 
-	final input = [
-		Person(PersonName('Alice', 'Smith'), 30),
-		{'Bob': Person(PersonName('Bob', 'Brown'), 25)},
-	];
+  final input = [
+    Person(PersonName('Alice', 'Smith'), 30),
+    {'Bob': Person(PersonName('Bob', 'Brown'), 25)},
+  ];
 
-	final JsonValue encoded = registry.serialize(input);
-	print(encoded.build());
-	// [
-	//   {
-	//     "__type": "Person",
-	//     "__data": {
-	//       "name": {
-	//         "__type": "PersonName",
-	//         "__data": {"firstName": "Alice", "lastName": "Smith"}
-	//       },
-	//       "age": 30
-	//     }
-	//   },
-	//   {
-	//     "Bob": {
-	//       "__type": "Person",
-	//       "__data": {
-	//         "name": {
-	//           "__type": "PersonName",
-	//           "__data": {"firstName": "Bob", "lastName": "Brown"}
-	//         },
-	//         "age": 25
-	//       }
-	//     }
-	//   }
-	// ]
+  final JsonValue encoded = registry.serialize(input);
+  print(encoded.build());
+  // [
+  //   {
+  //     "__type": "Person",
+  //     "__data": {
+  //       "name": {
+  //         "__type": "PersonName",
+  //         "__data": {"firstName": "Alice", "lastName": "Smith"}
+  //       },
+  //       "age": 30
+  //     }
+  //   },
+  //   {
+  //     "Bob": {
+  //       "__type": "Person",
+  //       "__data": {
+  //         "name": {
+  //           "__type": "PersonName",
+  //           "__data": {"firstName": "Bob", "lastName": "Brown"}
+  //         },
+  //         "age": 25
+  //       }
+  //     }
+  //   }
+  // ]
 
-	final decoded = registry.deserialize(encoded);
-	print(decoded is List); // true
+  final decoded = registry.deserialize(encoded);
+  print(decoded is List); // true
 }
 ```
 
@@ -282,26 +282,26 @@ import 'package:typeson/typeson.dart';
 class Name { final String v; Name(this.v); }
 
 void main() {
-	final reg = JsonRegistry(
-		parser: const FlatTypeParser(), // defaults to discriminator key "$type"
-		entries: [
-			JsonRegistryEntry<Name>(
-				type: 'Name',
-				serializer: (n) => JsonObject.wrap({'v': n.v}),
-				deserializer: (json) => Name(json['v']!.asString.value),
-			),
-		],
-	);
+  final reg = JsonRegistry(
+    parser: const FlatTypeParser(), // defaults to discriminator key "$type"
+    entries: [
+      JsonRegistryEntry<Name>(
+        type: 'Name',
+        serializer: (n) => JsonObject.wrap({'v': n.v}),
+        deserializer: (json) => Name(json['v']!.asString.value),
+      ),
+    ],
+  );
 
-	final json = reg.serialize(Name('Zed'));
-	print(json.build());
-	// {
-	//   "$type": "Name",
-	//   "v": "Zed"
-	// }
+  final json = reg.serialize(Name('Zed'));
+  print(json.build());
+  // {
+  //   "$type": "Name",
+  //   "v": "Zed"
+  // }
 
-	final out = json.asObject.asType<Name>(registry: reg);
-	print(out.v); // Zed
+  final out = json.asObject.asType<Name>(registry: reg);
+  print(out.v); // Zed
 }
 ```
 
@@ -317,19 +317,19 @@ abstract class Animal {}
 class Dog implements Animal { final String name; Dog(this.name); }
 
 void main() {
-	final reg = JsonRegistry(
-		entries: [
-			JsonRegistryEntry<Animal>(
-				type: 'Animal',
-				serializer: (a) => JsonObject.wrap({'name': (a as Dog).name}),
-				deserializer: (json) => Dog(json['name']!.asString.value),
-				check: JsonRegistryEntry.assignableType<Animal>,
-			),
-		],
-	);
+  final reg = JsonRegistry(
+    entries: [
+      JsonRegistryEntry<Animal>(
+        type: 'Animal',
+        serializer: (a) => JsonObject.wrap({'name': (a as Dog).name}),
+        deserializer: (json) => Dog(json['name']!.asString.value),
+        check: JsonRegistryEntry.assignableType<Animal>,
+      ),
+    ],
+  );
 
-	final roundTrip = reg.deserialize(reg.serialize(Dog('Rex')));
-	print((roundTrip as Dog).name); // Rex
+  final roundTrip = reg.deserialize(reg.serialize(Dog('Rex')));
+  print((roundTrip as Dog).name); // Rex
 }
 ```
 

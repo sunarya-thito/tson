@@ -26,10 +26,16 @@ extension JsonValueExtension on JsonValue {
   /// print(obj.build()); // pretty, without "b"
   /// print(obj.build(indent: null, explicitNulls: true)); // compact, keeps b
   /// ```
-  String build({int? indent = 2, bool explicitNulls = false}) {
+  String build(
+      {int? indent,
+      bool explicitNulls = false,
+      JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls}) {
     return (JsonBuilder(toEncodeable())
+          // ignore: deprecated_member_use_from_same_package
           ..indent = indent
-          ..explicitNulls = explicitNulls)
+          // ignore: deprecated_member_use_from_same_package
+          ..explicitNulls = explicitNulls
+          ..options = options)
         .toString();
   }
 

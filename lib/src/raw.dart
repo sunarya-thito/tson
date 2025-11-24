@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 import 'package:typeson/typeson.dart';
 
@@ -93,7 +91,11 @@ class RawJsonValue implements JsonValue {
 
   /// Encodes this value using `jsonEncode`.
   @override
-  String toJson() => jsonEncode(toEncodeable());
+  String toJson(
+      {JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls}) {
+    final encodeable = toEncodeable();
+    return (JsonBuilder(encodeable)..options = options).toString();
+  }
 
   @override
   String toString() => value.toString();
@@ -378,7 +380,11 @@ class _RawJsonArray extends AbstractJsonValue
       _value.map((e) => _wrapNullable(e)?.toEncodeable()).toList();
 
   @override
-  String toJson() => jsonEncode(toEncodeable());
+  String toJson(
+      {JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls}) {
+    final encodeable = toEncodeable();
+    return (JsonBuilder(encodeable)..options = options).toString();
+  }
 
   @override
   int get hashCode => const ListEquality().hash(value);
@@ -563,7 +569,11 @@ class _RawJsonObject extends AbstractJsonValue
       );
 
   @override
-  String toJson() => jsonEncode(toEncodeable());
+  String toJson(
+      {JsonEncoderOptions options = JsonEncoderOptions.compactWithNulls}) {
+    final encodeable = toEncodeable();
+    return (JsonBuilder(encodeable)..options = options).toString();
+  }
 
   @override
   T asType<T>({JsonRegistry? registry}) {

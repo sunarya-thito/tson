@@ -179,9 +179,9 @@ class SimpleJsonRegistryEntry<T> implements JsonRegistryEntry<T> {
 
   /// Optional match predicate; if not provided, [exactType] is used.
   final JsonEntryPredicate? check;
-  @override
 
   /// Optional entry-level parser override.
+  @override
   final JsonObjectParser? parser;
 
   const SimpleJsonRegistryEntry({
